@@ -139,8 +139,8 @@ exports.CommentList = async (req, res) => {
     try {
         const procedureQuery = `
             SELECT comment_id, user_id, post_id, comment , time
-            FROM commemnt
-            WHERE post_id = ? AND user_id != ?`; 
+            FROM comment
+            WHERE post_id = ? AND user_id = ?`; 
        const result = await queryDb(procedureQuery, [post_id, user_id]);
         if (result.length === 0) {
             return res.status(201).json({ msg: "No messages found" });
