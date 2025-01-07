@@ -122,7 +122,7 @@ exports.addComment = async (req, res) => {
         await queryDb(query, [user_id, post_id, comment, time]); 
         return res.status(200).json({
             msg: 'Comment send successfully',
-            message: { user_id, post_id, comment,time }
+            // message: { user_id, post_id, comment,time }
         });
     } catch (e) {
         console.error(e);
@@ -152,8 +152,45 @@ exports.CommentList = async (req, res) => {
     }
 };
 
+exports.addLike = async(req, res)=>{
+    const {user_id , post_id , like_value } = req.body;
+    if (user_id == null || post_id == null || like_value == null) {
+        return res.status(400).json({ msg: "All fields are required" });
+    }
+    const likeValueInt = like_value === true || like_value === 1 ? 1 : 0;
+    try{
+        const query = "INSERT INTO like_data (user_id , post_id, like_value, time) VALUES (?, ?, ?, ?)";
+        await queryDb(query,[user_id , post_id, likeValueInt, time]);
+        return res.status(200).json({
+            msg:'like send successfully',
+        })
+    }
+    catch(e){
+        console.error(e)
+        return res.status(500).json({ msg: 'Something went wrong while sending the message' });
 
+    }
+}
 
-
+exports.GetLikeList = async (req, res) => {
+    const { user_id, post_id } = req.body;
+    if (!user_id|| !post_id) {
+        return res.status(400).json({ msg: 'All Field are required' });
+    }
+    try {
+        const procedureQuery = `
+            SELECT like_id, user_id, post_id, like_value , time
+            FROM like_data
+            WHERE post_id = ? AND user_id = ?`; 
+       const result = await queryDb(procedureQuery, [post_id, user_id]);
+        if (result.length === 0) {
+            return res.status(201).json({ msg: "No messages found" });
+        }
+        return res.status(200).json({ msg: "Comment retrieved successfully", data: result });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ msg: e.sqlMessage || "Something went wrong in the API call." });
+    }
+};
 
 
